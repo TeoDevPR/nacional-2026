@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nacional 2026 — Programación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --bg:#0a0a0b;--surface:#141417;--surface-2:#1c1c21;--border:#2a2a30;
+  --text:#f5f5f7;--muted:#8a8a94;--accent:#ff4d2e;--accent-soft:#ff4d2e22;
+  --green:#22c55e;--yellow:#eab308;--red:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding:48px 24px 96px}
+header{margin-bottom:48px}
+.kicker{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px;opacity:0;transform:translateY(20px)}
+.title{font-size:clamp(36px,6.5vw,84px);font-weight:800;letter-spacing:-.03em;line-height:.95;overflow:hidden}
+.title span{display:inline-block;transform:translateY(110%)}
+.subtitle{margin-top:20px;color:var(--muted);font-size:17px;max-width:620px;opacity:0;transform:translateY(20px)}
+.countdown{margin-top:28px;display:flex;gap:16px;flex-wrap:wrap;opacity:0;transform:translateY(20px)}
+.cd-item{background:var(--surface);border:1px solid var(--border);padding:16px 20px;border-radius:12px;min-width:100px}
+.cd-num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600}
+.cd-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+
+nav.phases{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid var(--border);opacity:0}
+.chip{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.chip:hover{border-color:var(--accent);color:var(--text);transform:translateY(-2px)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 8px 24px -8px var(--accent)}
+.chip:active{transform:scale(.96)}
+.chip .wk{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.7;margin-left:6px}
+
+.phase-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:40px}
+.meta{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.meta-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.meta-value{font-size:17px;font-weight:600}
+
+.days{display:flex;flex-direction:column;gap:16px}
+.day{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .3s}
+.day:hover{border-color:#3a3a44}
+.day-head{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;user-select:none;transition:background .2s}
+.day-head:hover{background:var(--surface-2)}
+.day-head:active{transform:scale(.998)}
+.day-title{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.day-title .muted{color:var(--muted);font-weight:400;margin-left:8px;font-size:14px}
+.day-toggle{color:var(--muted);font-size:12px;transition:transform .35s cubic-bezier(.65,0,.35,1);flex-shrink:0}
+.day.open .day-toggle{transform:rotate(180deg)}
+.day-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.65,0,.35,1)}
+.day.open .day-body{grid-template-rows:1fr;border-top:1px solid var(--border)}
+.day-body>div{overflow:hidden;min-height:0}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;padding:14px 16px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+tbody td{padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--surface-2)}
+.ex-name{font-weight:600}
+.mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+.pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:500;background:var(--accent-soft);color:var(--accent)}
+.note{color:var(--muted);font-size:13px;line-height:1.5;max-width:360px}
+
+.callout{border-radius:12px;padding:14px 18px;margin-bottom:12px;font-size:14px;line-height:1.5}
+.callout.tip{background:#eab30810;border:1px solid #eab308;color:#fde68a}
+.callout.warn{background:#ef444410;border:1px solid #ef4444;color:#fecaca}
+.callout.info{background:var(--accent-soft);border:1px solid var(--accent);color:#ffd4c7}
+
+/* Competition tables */
+.comp-table{width:100%;border-collapse:collapse;font-size:14px;margin-top:4px}
+.comp-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+.comp-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top;font-size:14px}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table tr:hover{background:var(--surface-2)}
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);padding:20px 24px 8px;border-top:1px solid var(--border)}
+
+@media (max-width:720px){
+  .wrap{padding:28px 14px 72px}
+  header{margin-bottom:28px}
+  .subtitle{font-size:15px}
+  .countdown{gap:10px}
+  .cd-item{padding:12px 14px;min-width:0;flex:1}
+  .cd-num{font-size:22px}
+  .cd-label{font-size:10px}
+  nav.phases{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px;gap:6px;margin-bottom:20px;padding-bottom:20px}
+  nav.phases::-webkit-scrollbar{display:none}
+  .chip{padding:8px 12px;font-size:13px}
+  .phase-meta{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+  .meta{padding:12px}
+  .meta-value{font-size:15px}
+  .day-head{padding:14px 16px}
+  .day-title{font-size:14px}
+  .day-title .muted{display:block;margin-left:0;margin-top:3px;font-size:11px}
+  /* card layout on mobile */
+  table,thead,tbody,tr,td{display:block}
+  thead{display:none}
+  tbody tr{padding:14px 16px;border-bottom:1px solid var(--border)}
+  tbody tr:last-child{border-bottom:none}
+  tbody td{border:none;padding:3px 0;display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+  tbody td::before{content:attr(data-label);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:500;flex-shrink:0;min-width:72px}
+  td.ex-name{display:block;font-size:15px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+  td.ex-name::before{display:none}
+  td.note{display:block;color:var(--muted);font-size:12px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);max-width:none}
+  td.note::before{display:block;margin-bottom:3px}
+  .section-label{padding:14px 16px 6px}
+  .comp-table th,.comp-table td{padding:8px 10px;font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#gate-input:focus{border-color:var(--accent)}
+#gate-form button:hover{transform:translateY(-1px)}
+#gate-form button:active{transform:scale(.98)}
+</style>
+</head>
+<body>
+<div id="gate" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px">
+  <form id="gate-form" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:360px;width:100%">
+    <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px">Acceso privado</div>
+    <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px">Nacional 2026</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px">Ingresá la contraseña para ver la programación.</p>
+    <input id="gate-input" type="password" autocomplete="current-password" autofocus placeholder="Contraseña" style="width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-family:inherit;font-size:15px;outline:none;transition:border-color .2s">
+    <button type="submit" style="width:100%;margin-top:12px;background:var(--accent);color:#fff;border:none;padding:12px 14px;border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:transform .15s">Entrar</button>
+    <div id="gate-err" style="color:var(--red);font-size:13px;margin-top:12px;min-height:18px"></div>
+  </form>
+</div>
+<div class="wrap" style="visibility:hidden">
+  <header>
+    <div class="kicker" id="kicker">Powerlifting · Nacional 2026</div>
+    <h1 class="title" id="title"><span>Programación</span> <span>de Bench.</span></h1>
+    <p class="subtitle" id="subtitle">12 semanas hacia el Nacional. Cuatro fases, autoregulación por velocidad, y un plan claro para defender el título.</p>
+    <div class="countdown" id="countdown">
+      <div class="cd-item"><div class="cd-num" id="cd-days">—</div><div class="cd-label">días restantes</div></div>
+      <div class="cd-item"><div class="cd-num">7–11 Jul</div><div class="cd-label">Nacional 2026</div></div>
+      <div class="cd-item"><div class="cd-num">180 kg</div><div class="cd-label">Target 3er intento</div></div>
+    </div>
+  </header>
+
+  <nav class="phases" id="phases"></nav>
+  <div class="phase-meta" id="phase-meta"></div>
+  <div class="days" id="days"></div>
+</div>
+
+<script>
+const COLS = ["Ejercicio","Sets × Reps","Descanso","RPE","Carga","Nota Técnica"];
+
+const DATA = {
+  transicion:{
+    name:"Transición", weeks:"Sem 1-2", dates:"13–25 Abril",
+    meta:[["Frecuencia","2-3×/sem"],["Intensidad","60-65% (108-117 kg)"],["Volumen","MUY BAJO"],["Foco","Recuperación + calibrar Stance"]],
+    callouts:[
+      {t:"warn",s:"💡 SEMANA 1: Acabás de competir. NO entrenes pesado. Caminata, movilidad, estiramientos. Si querés tocar la barra, solo drills de leg drive con barra vacía."},
+      {t:"tip",s:"💡 Al final de Sem 2 ya tenés 4-6 sesiones con Stance registradas — ese es tu perfil de velocidad base para autorregular en Acumulación."},
+    ],
+    days:[
+      {title:"Jueves 16 Abril",sub:"Sesión Opcional Ultra-Ligera (Sem 1)",rows:[
+        ["Drill Leg Drive (barra vacía)","3 × 8","—","RPE 3","20 kg","Retomar patrón. Cue \"talones a traps\". 50/50 Thompson"],
+        ["Bench Press Ligero","3 × 8","2 min","RPE 4-5","60% / 108 kg","PRIMERA sesión con Stance. Empezar a construir perfil de velocidad"],
+        ["Remo Ligero","3 × 10","90 seg","RPE 5","40 kg","Activación escapular"],
+        ["Face Pulls","3 × 15","60 seg","RPE 5","17.5 kg","Salud hombro"],
+      ]},
+      {title:"Sábado 18 Abril",sub:"Sesión Opcional Ultra-Ligera (Sem 1)",rows:[
+        ["Drill Leg Drive","3 × 8","—","RPE 3","60 kg","\"Talones a traps\" 50/50. Sentir la conexión piernas→barra"],
+        ["Bench Press Ligero","3 × 8","2 min","RPE 4-5","60% / 108 kg","Con Stance. Registrar velocidad a 108 kg como referencia"],
+        ["Press Inclinado DB","2 × 10","2 min","RPE 5","24 kg/brazo","Bomba ligera"],
+        ["Band Pull-Aparts","4 × 15","60 seg","RPE 5","—","Activación escapular"],
+      ]},
+      {title:"Lunes 20 Abril",sub:"Bench A — Reactivación (Sem 2)",rows:[
+        ["Drill Leg Drive","2 × 5","90 seg","RPE 4","60 kg","\"Talones a traps\" en cada rep"],
+        ["Bench Press Competición","4 × 5","3 min","RPE 6","65% / 117 kg","Vel ≥0.57 m/s. Con pausa + Stance. Construir perfil"],
+        ["Remo Pecho Apoyado","3 × 10","2 min","RPE 6-7","42.5 kg","Retomar volumen de espalda"],
+        ["Press Inclinado 30°","3 × 8","2 min","RPE 6","60 kg","Ligero"],
+        ["Face Pulls","3 × 15","90 seg","RPE 6","20 kg","Salud hombro"],
+      ]},
+      {title:"Martes 21 Abril",sub:"Lower — Reactivación (Sem 2)",rows:[
+        ["Hack Squat","3 × 10","2.5 min","RPE 6","90 kg","Retomar, no progresar"],
+        ["Hip Thrust","3 × 10","2 min","RPE 6-7","110 kg","Transferencia leg drive. Cue: \"talones a traps\""],
+        ["Extensiones Cuádriceps","3 × 12","90 seg","RPE 7","45 kg","Mantener masa"],
+        ["Curl Femoral","2 × 12","90 seg","RPE 6","40 kg","Mantenimiento"],
+        ["Gemelos de Pie","3 × 15","90 seg","RPE 7","80 kg","Pausa 1s abajo"],
+      ]},
+      {title:"Jueves 23 Abril",sub:"Bench B — Volumen Ligero (Sem 2)",rows:[
+        ["Bench Press Competición","4 × 6","3 min","RPE 6","63% / 113 kg","Con pausa + leg drive. Stance en cada serie. Registrar"],
+        ["Spoto Press","3 × 6","2.5 min","RPE 6","60% / 108 kg","Pausa flotante 1-2cm. Retomar patrón"],
+        ["Remo Horizontal","3 × 10","2 min","RPE 6-7","50 kg","Tracción"],
+        ["Elevaciones Laterales","3 × 15","60 seg","RPE 7","10 kg","Salud hombro"],
+        ["Tríceps Pushdown","2 × 12","90 seg","RPE 6","30 kg","Mantenimiento"],
+      ]},
+      {title:"Viernes 24 Abril",sub:"Lower Corto (Sem 2)",rows:[
+        ["Hip Thrust","3 × 10","2 min","RPE 7","115 kg","Transferencia leg drive. Cue: \"talones a traps\""],
+        ["Curl Femoral","2 × 12","90 seg","RPE 6","42.5 kg","Mantenimiento"],
+        ["Gemelos Sentado","3 × 15","90 seg","RPE 7","40 kg","Trabajo sóleo"],
+      ]},
+      {title:"Sábado 25 Abril",sub:"Bench C — Técnico + Leg Drive (Sem 2)",rows:[
+        ["Bench Comp con Énfasis Leg Drive","4 × 5","3 min","RPE 6","65% / 117 kg","50/50 Thompson. FILMAR. Comparar vs semana anterior. Registrar"],
+        ["Larsen Press (diagnóstico)","2 × 6","2.5 min","RPE 7","63% / 113 kg","SIN piernas. Registrar velocidad. Base de comparación para el bloque"],
+        ["Press Inclinado DB","3 × 10","2 min","RPE 6","28 kg/brazo","ROM largo"],
+        ["Remo Alto","3 × 12","90 seg","RPE 6-7","50 kg","Pausa en contracción"],
+        ["Rear Delts","3 × 15","90 seg","RPE 6","12 kg","Salud hombro"],
+      ]},
+    ]
+  },
+
+  acumulacion:{
+    name:"Acumulación", weeks:"Sem 3-6", dates:"27 Abr – 23 May",
+    meta:[["Frecuencia","4×/sem"],["Intensidad","68-80% (122-144 kg)"],["Volumen","ALTO"],["Foco","Volumen + leg drive + perfil VBT"]],
+    callouts:[
+      {t:"info",s:"💡 Pirámide Sheiko Sem 3: 90×5→108×4→126×3→135×3→144×2→135×3→126×4 | Sem 4-5: +2-3 kg cada escalón | Sem 6 DELOAD: solo 90×5→108×3→126×3→108×3"},
+      {t:"info",s:"📋 PAUSAS: Bench comp 2-3s. Spoto 3-5s a 2cm del pecho. | TEMPO: Excéntrico 2s / pausa / concéntrico MÁXIMA velocidad. | ROTACIÓN Jueves: Sem 3+5 = Spoto Press · Sem 4+6 = Dead Bench desde pins (3-5×1 @ 75-80%, 135-144 kg, máx explosividad, 3+ min descanso)."},
+      {t:"warn",s:"⚠️ SEM 6 = DELOAD: -15% carga Lunes / -10-13% resto, -40% vol. | 🚨 DELOAD NO PLANIFICADO: 2+ sesiones consecutivas 🔴 en Stance (<90% vel base) = mini-deload 3 días."},
+    ],
+    days:[
+      {title:"Lunes",sub:"Bench A — Fuerza + CAT Speed",rows:[
+        ["Drill Leg Drive","2 × 5","90 seg","RPE 4","S3-6: 60 kg","\"Talones a traps\" antes de cada sesión bench"],
+        ["Bench Press Competición","5 × 4","3-4 min","RPE 7-8","S3:131 / S4:135 / S5:140 / S6:120 kg","Vel ≥0.40 m/s. Con pausa + leg drive. Stance cada serie"],
+        ["🆕 CAT Speed Bench","6 × 3","60 seg","RPE 5-6","S3:100 / S4:104 / S5:108 / S6:95 kg","MÁX velocidad. 1ra rep ≥0.85 m/s / cortar <0.75"],
+        ["Remo Pecho Apoyado","4 × 8-10","2.5 min","RPE 7-8","S3:47.5 / S4:50 / S5:52.5 / S6:42.5 kg","Retracción escapular máxima"],
+        ["Press Inclinado 30°","3 × 6-8","2.5 min","RPE 7-8","S3:65 / S4:67.5 / S5:70 / S6:60 kg","Salida del pecho"],
+        ["🆕 Chin-Ups (agarre supino)","3 × AMRAP","2 min","RPE 8","PC / PC+1 / PC+2 / PC","Dorsal + bíceps + postura. Agregar lastre >8 reps limpias"],
+        ["Face Pulls","3 × 15-20","90 seg","RPE 6-7","S3:22.5 / S4-5:25 / S6:20 kg","CRÍTICO salud hombro"],
+      ]},
+      {title:"Martes",sub:"Bench B — Volumen Pirámide Sheiko-Style",rows:[
+        ["Bench Press Comp (Pirámide)","Ver nota","3 min","RPE 6-8","50-80%","Pirámide: 50%×5→60%×4→70%×3→75%×3→80%×2→75%×3→70%×4"],
+        ["Lat Pulldown","4 × 10","2 min","RPE 7-8","S3:65 / S4:67.5 / S5:70 / S6:55 kg","Espalda: 20+ series semanales"],
+        ["⚠️ DB Bench Press","3 × 8-10","2.5 min","RPE 7-8","S3:42.5 / S4:45 / S5:47.5 / S6:35 kg/lado","Tensión continua"],
+        ["Elevaciones Laterales","2 × 12-15","60 seg","RPE 7-8","S3:10 / S4-5:12.5 / S6:10 kg","Control sin impulso"],
+        ["⚠️ Close-Grip Bench Press","3 × 6-8","2.5 min","RPE 7-8","S3:35 / S4:37.5 / S5:40 / S6:30 kg","Mantenimiento"],
+        ["🆕 Curl Bíceps (DB o barra)","2 × 12-15","90 seg","RPE 7","—","Salud codo"],
+      ]},
+      {title:"Jueves",sub:"Bench C — Pausado + Leg Drive + Spoto",rows:[
+        ["Drill Leg Drive","2 × 5","90 seg","RPE 4","60 kg","Calentamiento con cue \"talones a traps\""],
+        ["Bench Comp Énfasis Leg Drive","4 × 5","3-4 min","RPE 7-8","S3:126 / S4:131 / S5:135 / S6:117 kg","50/50 Thompson. FILMAR. Pausa + timing piernas. Registrar"],
+        ["Spoto Press / Dead Bench*","3 × 6","3 min","RPE 7-8","S3:122 / S4:126 / S5:129 / S6:113 kg","*Ver rotación. Pausa flotante 1-2cm del pecho. 50% leg drive"],
+        ["Larsen Press (diagnóstico)","2 × 6","2.5 min","RPE 7-8","S3:115 / S4:117 / S5:120 / S6:108 kg","SIN piernas. Comparar vel vs Bench Comp. Brecha DEBE crecer"],
+        ["Remo Horizontal","4 × 8-10","2 min","RPE 7-8","S3:52.5 / S4:55 / S5:57.5 / S6:45 kg","Tracción"],
+        ["Rear Delts","3 × 15","90 seg","RPE 6","12-15 kg","Salud hombro posterior"],
+      ]},
+      {title:"Viernes",sub:"Lower — Hipertrofia Piernas (Carga Estable)",rows:[
+        ["Hack Squat","4 × 8-10","3 min","RPE 7-8","S3:100 / S4:105 / S5:105 / S6:90 kg","Mantener masa. NO progresar agresivamente"],
+        ["Hip Thrust","3 × 10","2.5 min","RPE 7-8","S3:120 / S4:125 / S5:130 / S6:110 kg","Transferencia leg drive. Cue: \"talones a traps\""],
+        ["Extensiones Cuádriceps","3 × 12-15","90 seg","RPE 8","S3:50 / S4:52.5 / S5:55 / S6:45 kg","Última serie al fallo"],
+        ["Curl Femoral","3 × 12","90 seg","RPE 7","S3:42.5 / S4-5:45 / S6:40 kg","Mantenimiento isquios"],
+        ["Gemelos de Pie","3 × 15","90 seg","RPE 7","—","Pausa 1s abajo"],
+      ]},
+      {title:"Sábado",sub:"Bench D — Técnica + Velocidad + Espalda",rows:[
+        ["Bench Press Comp (Técnico)","4 × 5","3 min","RPE 6-7","S3:122 / S4:126 / S5:129 / S6:113 kg","Vel ≥0.50 m/s. Técnica perfecta. Cada rep = simulación comp"],
+        ["CAT Speed Bench","5 × 3","60 seg","RPE 5","S3-5:100 / S6:90 kg","1ra rep ≥0.85 m/s / cortar <0.75. Criterio idéntico al Lunes"],
+        ["Remo Pecho Apoyado","4 × 10","2 min","RPE 7","S3:45 / S4:47.5 / S5:50 / S6:40 kg","Tracción alta: 20+ series espalda/sem total"],
+        ["🆕 Weighted Dips","3 × 6-8","2.5 min","RPE 7-8","S3:30 / S4:32 / S5:34 / S6:24 kg/brazo","ROM largo. Solo en fase Acumulación"],
+        ["⚠️ Extensión Overhead Tríceps","2 × 10-12","90 seg","RPE 7-8","S3:32.5 / S4:35 / S5:37.5 / S6:27.5 kg","Mantenimiento"],
+        ["Band Pull-Aparts (supinado)","3 × 15-20","60 seg","RPE 6","—","Salud hombro"],
+        ["🆕 Curl Bíceps (DB o barra)","2 × 12-15","90 seg","RPE 7","—","Salud codo"],
+      ]},
+    ]
+  },
+
+  intensificacion:{
+    name:"Intensificación", weeks:"Sem 7-10", dates:"25 May – 20 Jun",
+    meta:[["Frecuencia","3×/sem + Lower"],["Intensidad","80-95% (144-171 kg)"],["Volumen","MEDIO → BAJO"],["Foco","Top sets + autoregulación Stance"]],
+    callouts:[
+      {t:"warn",s:"🚨 REGLA IPF 4.2.1 (1-mar-2026): prohibido 'upper body thrust'. EL TORSO NO SE MUEVE al Press. Leg drive horizontal = legal. Levantar el pecho = descalificación. FILMAR de costado 1×/sem desde Sem 7."},
+      {t:"info",s:"💡 Vel targets: Sem 7 @ 152.5 → ≥0.33 | Sem 8 @ 157.5 → ≥0.28 | Sem 10 @ 171 → ≥0.21. Si no alcanza = bajar 2.5 kg. | PAUSAS: 1-2s competition standard. TEMPO: 2s exc / pausa / X conc."},
+      {t:"warn",s:"🏋️ SEM 10 LUNES: Post-single 171 kg → 1-2 Supramaximal Holds 8-10s @ 190-195 kg (105-108%) en lockout. Pins de seguridad OBLIGATORIOS. | ⚠️ SEM 9 = OVERREACH REAL (vol ~+40% vs Sem 8)."},
+    ],
+    days:[
+      {title:"Lunes",sub:"Bench A — Fuerza Máxima + Speed",rows:[
+        ["Drill Leg Drive","2 × 3","90 seg","RPE 4","60 kg","Activación. Ya debe ser automático"],
+        ["Bench Comp — Top Set","Ver nota","5 min","RPE 8-8.5","S7: 3×3 @152.5 / S8: 2×2 @157.5 / S9: 5×2 @152.5 / S10: 1×1 @171","Stance OBLIGATORIO. Si vel <target = bajar 2.5 kg. No forzar"],
+        ["Back-off Sets","3 × 3","3 min","RPE 7","S7-8: 145 / S9: 5×3 @145 / S10: 3×2 @152.5 kg","Bajar 5% del top set. Volumen complementario"],
+        ["CAT Speed Bench","6 × 3","60 seg","RPE 5-6","S7:104 / S8:108 / S9:113 / S10: 3×3 @95 kg","1ra rep ≥0.80 m/s / cortar <0.70. Cortar si vel persiste baja"],
+        ["Remo Pecho Apoyado","3 × 8-10","2.5 min","RPE 7-8","S7:52.5 / S8-9:55 / S10:45 kg","Mantener salud hombro"],
+        ["Tríceps Close Grip","3 × 5","2.5 min","RPE 7-8","S7:126 / S8:129 / S9:131 kg","Eliminado en Sem 10"],
+        ["Face Pulls","3 × 15-20","90 seg","RPE 6-7","S7-8:25 / S9:27.5 / S10:22.5 kg","CRÍTICO salud hombro"],
+      ]},
+      {title:"Martes",sub:"Lower — Reducido Progresivamente",rows:[
+        ["Hack Squat","3 × 6-8","3 min","RPE 7-8","S7-8:105 / S9:100 / S10:90 kg","Carga estable. Reducir Sem 9-10"],
+        ["Hip Thrust","3 × 8-10","2.5 min","RPE 7-8","S7:135 / S8:140 / S9:130 / S10:115 kg","Transferencia leg drive. SEM 10: Solo 2×8 @ 100 kg"],
+        ["Curl Femoral","2 × 12","90 seg","RPE 7","—","Mantenimiento. Eliminar Sem 10"],
+        ["Gemelos","3 × 12-15","90 seg","RPE 7","S7:90 / S8:92.5 / S9:85 / S10:75 kg","Reducir progresivamente. Eliminar Sem 10"],
+      ]},
+      {title:"Miércoles",sub:"Bench B — Volumen Específico",rows:[
+        ["Bench Press Comp","4 × 4","3-4 min","RPE 7-8","S7:140 / S8:144 / S9: 5×4 @142.5 / S10: 3×2 @152.5","Con pausa + leg drive. Sem 9 = overreach"],
+        ["Spoto Press","3 × 4-5","3 min","RPE 7-8","S7:129 / S8:131 / S9: 4×5 @133 / S10:122 kg","Pausa flotante. Mantener 50% piernas durante pausa"],
+        ["Lat Pulldown","4 × 8","2 min","RPE 7-8","S7:70 / S8-9:72.5 / S10:55 kg","Espalda"],
+        ["Elevaciones Laterales","2 × 12-15","60 seg","RPE 7","S7:12.5 / S8-9:15 / S10:10 kg","Control estricto"],
+        ["⚠️ Ext. Overhead Tríceps","2 × 10-12","90 seg","RPE 7-8","S7:42.5 / S8-9:45 kg","Eliminado Sem 10"],
+        ["🆕 Curl Bíceps (DB o barra)","2 × 12-15","90 seg","RPE 7","S7-8: 14 / S9: 12 kg/brazo","Reducido/eliminado Sem 10"],
+      ]},
+      {title:"Viernes",sub:"Bench C — Simulación Competencia + Leg Drive",rows:[
+        ["Bench Comp + Comandos","4 × 3","3-4 min","RPE 7-8","S7:145 / S8:149 / S9: 5×3 @145 / S10: 3×1 @157.5 + 2×2 @126","COMANDOS en voz alta. Setup completo: muñequeras, cinturón"],
+        ["Larsen Press (diagnóstico)","2 × 5","2.5 min","RPE 7-8","S7:117 / S8:120 / S9:122 kg","Comparar vel vs Bench Comp. Eliminado Sem 10"],
+        ["Remo Horizontal","3 × 8-10","2 min","RPE 7-8","S7:60 / S8-9:62.5 / S10:50 kg","Tracción"],
+        ["Band Pull-Aparts (supinado)","3 × 15-20","60 seg","RPE 6","—","Salud hombro"],
+        ["🆕 Curl Bíceps (DB o barra)","2 × 12-15","90 seg","RPE 7","S7-8: 14 / S9: 12 kg/brazo","Salud codo. Reducido/eliminado Sem 10"],
+      ]},
+    ]
+  },
+
+  peaking:{
+    name:"Peaking + Taper + Comp", weeks:"Sem 11-12 + Comp", dates:"22 Jun – 11 Jul",
+    meta:[["Frecuencia","2×/sem"],["Intensidad","68-92% (122-165 kg)"],["Volumen","MUY BAJO → CERO"],["Foco","Opener rehearsal + recuperación"]],
+    callouts:[
+      {t:"info",s:"⏱️ Sesiones cortas (20-40 min). Salir del gym con ganas de más. Vol -60% vs normal."},
+      {t:"warn",s:"☕ PROTOCOLO CAFEÍNA: 100-150 mg al despertar. 250-325 mg ~60-90 min antes del primer intento. NO retirar cafeína los días previos. Siesta de 20 min si es posible."},
+    ],
+    days:[
+      {title:"Lunes 22 Junio",sub:"Opener Rehearsal — Taper 1",rows:[
+        ["Drill Leg Drive","2 × 3","—","RPE 3","60 kg","Último repaso consciente. Ya es automático"],
+        ["Bench Press Comp","2 × 1","5 min","RPE 7","92% / 165 kg","Vel ≥0.27 m/s. Opener rehearsal. COMANDOS. RPE ≤7 = todo bien"],
+        ["Back-off","2 × 2","3 min","RPE 6-7","80% / 145 kg","Solo mantener patrón activo"],
+        ["Remo Ligero","2 × 8","2 min","RPE 6","45 kg","Mantenimiento"],
+        ["Face Pulls","2 × 15","90 seg","RPE 6","20 kg","Salud hombro"],
+      ]},
+      {title:"Jueves 25 Junio",sub:"Técnico Ligero — Taper 1",rows:[
+        ["Bench Press Comp","3 × 3","3 min","RPE 5-6","70% / 126 kg","Vel ≥0.55 m/s. \"Ridículamente fácil\". Solo repaso motor"],
+        ["Band Pull-Aparts","3 × 15","60 seg","—","—","Activación. 25 min máximo. SALIR."],
+      ]},
+      {title:"Lunes 29 Junio",sub:"Último Bench Significativo — Taper 2",rows:[
+        ["Bench Press Comp","1 × 1","5 min","RPE 6-7","92% / 165 kg","Vel ≥0.27 m/s. DEBE salir rápido. Si RPE ≥8 → ajustar expectativas"],
+        ["Back-off","2 × 1","3 min","RPE 5-6","78% / 140 kg","Solo mantener el groove. Ligero"],
+        ["Remo Ligero","2 × 8","90 seg","RPE 5","40 kg","Solo equilibrio push-pull"],
+      ]},
+      {title:"Miércoles 1 Julio",sub:"Speed — Última Sesión",rows:[
+        ["Bench Press Comp","3 × 2","3 min","RPE 4-5","68% / 122 kg","Vel ≥0.55 m/s. Ultra-ligero. Solo encender el sistema nervioso"],
+        ["Face Pulls","2 × 15","60 seg","RPE 4","17.5 kg","Último toque de salud hombro. 20 min MÁXIMO. SALIR."],
+      ]},
+      {title:"Jue 2 – Vie 3 Julio",sub:"REST COMPLETO",rows:[
+        ["—","—","—","—","—","Hidratación alta. Dormir 8-9hs. Comida normal. Revisar equipo."],
+      ]},
+      {title:"Sábado 5 Julio",sub:"Activación Pre-Competencia (15 min)",rows:[
+        ["Bench Press","3 × 1","3 min","RPE 4","60-65% / 108-117 kg","Ultra-ligero. Full setup + leg drive + comandos. NO MÁS."],
+        ["Visualización PETTLEP","—","—","—","Singlet + muñequeras","Mental rehearsal de los 3 intentos"],
+      ]},
+      {title:"7–11 Julio — 🏆 NACIONAL 2026",sub:"Calentamiento en Tarima",customContent:"warmup"},
+      {title:"Estrategia de Intentos",sub:"Escenarios A / B / C",customContent:"attempts"},
+    ]
+  },
+
+  vbt:{
+    name:"Protocolo VBT", weeks:"Referencia", dates:"1RM = 180 kg",
+    meta:[["Dispositivo","Stance"],["Base","Bench Press"],["Readiness","@ 120 kg diario"],["Vel loss","≤25% Acum / ≤20% Intens"]],
+    callouts:[
+      {t:"info",s:"📋 READINESS DIARIO: (1) Registrar vel @ 120 kg warm-up fijo. (2) Comparar vs promedio personal. (3) ≥95% = 🟢 seguir. 90-95% = 🟡 mantener. <90% = 🔴 bajar carga. (4) Construir promedio personal las primeras 3-4 semanas."},
+      {t:"tip",s:"💡 REGLA DE ORO: Si primera rep sale ≥0.05 m/s más lenta que la tabla → bajar 2.5 kg. | 🚨 Si 2+ sesiones consecutivas 🔴 = mini-deload 3 días (50% vol, mantener intensidad)."},
+    ],
+    days:[
+      {title:"Tabla de Velocidad",sub:"Bench Press · 1RM = 180 kg",rows:[
+        ["50% / 90 kg","—","—","—","~0.96 m/s","Speed-Strength · Calentamiento, drills"],
+        ["55% / 100 kg","—","—","—","~0.88 m/s","Speed-Strength · CAT speed work"],
+        ["60% / 108 kg","—","—","—","~0.79 m/s","Strength-Speed · Speed sets"],
+        ["65% / 117 kg","—","—","—","~0.70 m/s","Accel Strength · Volumen ligero"],
+        ["70% / 126 kg","—","—","—","~0.62 m/s","Accel Strength · Acumulación"],
+        ["75% / 135 kg","—","—","—","~0.54 m/s","Absolute Strength · Sets moderados"],
+        ["80% / 144 kg","—","—","—","~0.47 m/s","Absolute Strength · Sets pesados"],
+        ["85% / 152.5 kg","—","—","—","~0.39 m/s","Triples/doubles pesados"],
+        ["90% / 162.5 kg","—","—","—","~0.30 m/s","Doubles/singles pesados"],
+        ["95% / 171 kg","—","—","—","~0.21 m/s","Near-max · Peaking"],
+        ["100% / 180 kg","—","—","—","~0.15-0.17 m/s","1RM (MVT) · Competencia máxima"],
+      ]},
+      {title:"Contingencias Sueño / Stress",sub:"Protocolo autoregulación",rows:[
+        ["🟡 Sueño 6-7h promedio/sem","—","—","—","—","Mantener carga planificada. Reducir vol 10-15% si RPE sube"],
+        ["🟠 Sueño <6h promedio/sem","—","—","—","—","Bajar carga 5-10%. Priorizar sets de calidad"],
+        ["🔴 Stress agudo (viaje, enfermedad)","—","—","—","—","Mini-deload: 50% vol, mantener intensidad 2-3 días"],
+        ["🚨 2 semanas consecutivas 🟠/🔴","—","—","—","—","Semana de deload completa. Evaluar causa"],
+      ]},
+    ]
+  },
+};
+
+const WARMUP_DATA = [
+  ["20 (barra)","10","—","-40 min","—","Movilidad previa 10 min. Leg drive activo desde acá"],
+  ["60","5","2 min","-35 min","Registrar","Primer dato de velocidad del día"],
+  ["100","3","3 min","-30 min","Registrar","Comparar vs base. Determinar readiness"],
+  ["120","2","3 min","-25 min","Registrar","Si ≥0.47 m/s (≤80%) = buen día"],
+  ["140","1","4 min","-20 min","Registrar","Debe salir rápido"],
+  ["150","1","5 min","-15 min","≥0.30 m/s","Último calentamiento pesado"],
+  ["157.5","1","8-10 min","-8 min","≥0.26 m/s","Solo si te sentís perfecto. OPCIONAL"],
+  ["OPENER (165 kg)","1","—","TARIMA","—","Primer intento"],
+];
+
+const ATTEMPTS_DATA = [
+  {esc:"🟢 A: Día ÓPTIMO",crit:"vel ≥0.30 m/s a 165",i1:"165 kg",i2:"172.5 kg",i3:"180 kg",note:"Abre de día bueno. 2do valida, 3ro PR."},
+  {esc:"🟡 B: Día MEDIO",crit:"vel 0.24-0.29 m/s",i1:"165 kg",i2:"170 kg",i3:"177.5 kg",note:"Opener ensayado. 2do conservador. 3ro PR +2.5."},
+  {esc:"🔴 C: Día MALO",crit:"vel <0.24 m/s o RPE 8+",i1:"162.5 kg",i2:"170 kg",i3:"175-177.5 kg",note:"Defender título = prioridad. 175 iguala PR."},
+];
+
+function buildWarmupTable(){
+  const el = document.createElement("div");
+  el.innerHTML = `<div class="section-label">Calentamiento en tarima</div>`;
+  const t = document.createElement("table");
+  t.className = "comp-table";
+  t.innerHTML = `<thead><tr><th>Peso</th><th>Reps</th><th>Descanso</th><th>Timing</th><th>Vel Stance</th><th>Nota</th></tr></thead>`;
+  const tbody = document.createElement("tbody");
+  WARMUP_DATA.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = r.map(c=>`<td>${c}</td>`).join("");
+    tbody.appendChild(tr);
+  });
+  t.appendChild(tbody);
+  el.appendChild(t);
+  return el;
+}
+
+function buildAttemptsTable(){
+  const el = document.createElement("div");
+  el.innerHTML = `<div class="section-label">Estrategia de intentos</div>`;
+  const t = document.createElement("table");
+  t.className = "comp-table";
+  t.innerHTML = `<thead><tr><th>Escenario</th><th>Criterio vel opener</th><th>1° Opener</th><th>2° Intento</th><th>3° Intento</th><th>Nota</th></tr></thead>`;
+  const tbody = document.createElement("tbody");
+  ATTEMPTS_DATA.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${r.esc}</td><td>${r.crit}</td><td style="font-weight:700">${r.i1}</td><td style="font-weight:700">${r.i2}</td><td style="font-weight:700;color:var(--accent)">${r.i3}</td><td style="color:var(--muted);font-size:13px">${r.note}</td>`;
+    tbody.appendChild(tr);
+  });
+  t.appendChild(tbody);
+  el.appendChild(t);
+  const rules = document.createElement("div");
+  rules.style.cssText="padding:14px 18px;font-size:13px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border)";
+  rules.innerHTML = `<strong style="color:var(--text)">⚖️ Regla:</strong> Decidir escenario ANTES de subir a tarima (en base a warmup 140 y 150). Si opener sale mejor de lo esperado, escalar al escenario superior en 2do. <strong style="color:var(--text)">🎯 3er intento:</strong> Solo tomar 180/177.5 si el 2do salió con RPE ≤8.5 Y velocidad esperada.`;
+  el.appendChild(rules);
+  return el;
+}
+
+function renderPhases(activeKey){
+  const nav = document.getElementById("phases");
+  nav.innerHTML="";
+  Object.entries(DATA).forEach(([k,v])=>{
+    const b = document.createElement("button");
+    b.className="chip"+(k===activeKey?" active":"");
+    b.innerHTML=`${v.name}<span class="wk">${v.weeks}</span>`;
+    b.onclick=()=>render(k);
+    nav.appendChild(b);
+  });
+}
+
+function renderMeta(phase){
+  const m = document.getElementById("phase-meta");
+  m.innerHTML="";
+  phase.meta.forEach(([l,v])=>{
+    const el = document.createElement("div");
+    el.className="meta";
+    el.innerHTML=`<div class="meta-label">${l}</div><div class="meta-value">${v}</div>`;
+    m.appendChild(el);
+  });
+}
+
+function renderDays(phase){
+  const container = document.getElementById("days");
+  container.innerHTML="";
+
+  phase.callouts?.forEach(c=>{
+    const el = document.createElement("div");
+    el.className=`callout ${c.t}`;
+    el.textContent=c.s;
+    container.appendChild(el);
+  });
+
+  phase.days.forEach((day,i)=>{
+    const card = document.createElement("div");
+    card.className="day"+(i===0?" open":"");
+
+    const head = document.createElement("div");
+    head.className="day-head";
+    head.innerHTML=`<div class="day-title">${day.title}<span class="muted">${day.sub}</span></div><div class="day-toggle">▾</div>`;
+    head.onclick=()=>card.classList.toggle("open");
+    card.appendChild(head);
+
+    const body = document.createElement("div");
+    body.className="day-body";
+    const inner = document.createElement("div");
+
+    if(day.customContent==="warmup"){
+      inner.appendChild(buildWarmupTable());
+    } else if(day.customContent==="attempts"){
+      inner.appendChild(buildAttemptsTable());
+    } else {
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML="<tr>"+COLS.map(c=>`<th>${c}</th>`).join("")+"</tr>";
+      const tbody = document.createElement("tbody");
+      day.rows.forEach(r=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML=`
+          <td class="ex-name" data-label="Ejercicio">${r[0]}</td>
+          <td class="mono" data-label="Sets × Reps">${r[1]}</td>
+          <td class="mono" data-label="Descanso">${r[2]}</td>
+          <td data-label="RPE"><span class="pill">${r[3]}</span></td>
+          <td class="mono" data-label="Carga">${r[4]}</td>
+          <td class="note" data-label="Nota">${r[5]}</td>`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(thead); table.appendChild(tbody);
+      inner.appendChild(table);
+    }
+
+    body.appendChild(inner);
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+
+  gsap.from(".day",{y:20,opacity:0,duration:.45,stagger:.055,ease:"power2.out"});
+  gsap.from(".meta",{y:16,opacity:0,duration:.4,stagger:.04,ease:"power2.out"});
+}
+
+let currentKey=null;
+function render(key){
+  if(key===currentKey)return;
+  const phase=DATA[key];
+  const meta=document.getElementById("phase-meta");
+  const days=document.getElementById("days");
+
+  const doRender=()=>{
+    renderPhases(key); renderMeta(phase); renderDays(phase);
+    currentKey=key;
+  };
+
+  if(currentKey===null){ doRender(); return; }
+
+  gsap.to([meta,days],{opacity:0,y:-10,duration:.2,ease:"power2.in",onComplete:()=>{
+    doRender();
+    gsap.fromTo([meta,days],{opacity:0,y:12},{opacity:1,y:0,duration:.4,ease:"power2.out"});
+    if(window.innerWidth<=720){
+      document.getElementById("phases").scrollIntoView({behavior:"smooth",block:"nearest"});
+    }
+  }});
+}
+
+function countdown(){
+  const diff=Math.max(0,Math.ceil((new Date("2026-07-07")-new Date())/86400000));
+  document.getElementById("cd-days").textContent=diff;
+}
+
+function animateIntro(){
+  const tl=gsap.timeline();
+  tl.to("#title span",{y:0,duration:1.1,ease:"expo.out",stagger:.09});
+  tl.to("#kicker",{opacity:1,y:0,duration:.6,ease:"power2.out"},"-=0.85");
+  tl.to("#subtitle",{opacity:1,y:0,duration:.65,ease:"power2.out"},"-=0.5");
+  tl.to("#countdown",{opacity:1,y:0,duration:.65,ease:"power2.out"},"-=0.5");
+  tl.to("#phases",{opacity:1,duration:.45},"-=0.35");
+}
+
+// Password gate — SHA-256 hash of password (password never stored)
+const PASS_HASH = "fb6c9ab0cea7952eb80ab4757fd074edbd442056dd3643151298a49d31092153";
+const SESSION_KEY = "nac26_auth";
+
+async function sha256(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function unlock(){
+  document.getElementById("gate").style.display = "none";
+  document.querySelector(".wrap").style.visibility = "visible";
+  countdown();
+  render("acumulacion");
+  animateIntro();
+}
+
+(async()=>{
+  if(sessionStorage.getItem(SESSION_KEY) === PASS_HASH){ unlock(); return; }
+  const form = document.getElementById("gate-form");
+  const input = document.getElementById("gate-input");
+  const err = document.getElementById("gate-err");
+  form.addEventListener("submit", async e=>{
+    e.preventDefault();
+    const h = await sha256(input.value);
+    if(h === PASS_HASH){
+      sessionStorage.setItem(SESSION_KEY, h);
+      unlock();
+    } else {
+      err.textContent = "Contraseña incorrecta";
+      input.value = "";
+      form.style.animation = "";
+      requestAnimationFrame(()=>{ form.style.animation = "shake .4s"; });
+    }
+  });
+})();
+</script>
+</body>
+</html>
