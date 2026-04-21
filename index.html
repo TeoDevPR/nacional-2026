@@ -77,6 +77,38 @@ tbody tr:hover{background:var(--surface-2)}
 .comp-table tr:hover{background:var(--surface-2)}
 .section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);padding:20px 24px 8px;border-top:1px solid var(--border)}
 
+/* Volume module */
+.vol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px}
+.vol-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;transition:border-color .3s,transform .3s}
+.vol-card:hover{border-color:#3a3a44;transform:translateY(-2px)}
+.vol-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.vol-muscle{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.vol-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.vol-badge.undertrain{background:#3b82f622;color:#60a5fa;border:1px solid #3b82f644}
+.vol-badge.mv{background:#64748b22;color:#94a3b8;border:1px solid #64748b44}
+.vol-badge.mev{background:#22c55e22;color:#4ade80;border:1px solid #22c55e44}
+.vol-badge.mav{background:#eab30822;color:#facc15;border:1px solid #eab30844}
+.vol-badge.mrv{background:#f9731622;color:#fb923c;border:1px solid #f9731644}
+.vol-badge.over{background:#ef444422;color:#f87171;border:1px solid #ef444444}
+.vol-stats{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+.vol-stats b{color:var(--text);font-weight:600}
+.vol-bar{position:relative;height:10px;border-radius:6px;overflow:visible;background:linear-gradient(to right,
+  #3b82f6 0%,#3b82f6 var(--mv,10%),
+  #64748b var(--mv,10%),#64748b var(--mev,25%),
+  #22c55e var(--mev,25%),#22c55e var(--mav,65%),
+  #eab308 var(--mav,65%),#eab308 var(--mrv,90%),
+  #ef4444 var(--mrv,90%),#ef4444 100%);
+  opacity:.75}
+.vol-marker{position:absolute;top:-5px;width:4px;height:20px;background:#fff;border-radius:2px;transform:translateX(-50%);box-shadow:0 0 0 3px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.4);transition:left 1s cubic-bezier(.34,1.56,.64,1)}
+.vol-scale{display:flex;justify-content:space-between;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.05em}
+.vol-scale span{position:relative}
+.vol-ex{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);font-size:12px;color:var(--muted);line-height:1.55}
+.vol-ex strong{color:var(--text);font-weight:600}
+.vol-legend{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.6}
+.vol-legend .zones{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.vol-legend .zones span{display:inline-flex;align-items:center;gap:6px}
+.vol-legend .zones i{width:10px;height:10px;border-radius:50%;display:inline-block}
+
 @media (max-width:720px){
   .wrap{padding:28px 14px 72px}
   header{margin-bottom:28px}
@@ -107,6 +139,11 @@ tbody tr:hover{background:var(--surface-2)}
   td.note::before{display:block;margin-bottom:3px}
   .section-label{padding:14px 16px 6px}
   .comp-table th,.comp-table td{padding:8px 10px;font-size:13px}
+  .vol-grid{grid-template-columns:1fr;gap:10px}
+  .vol-card{padding:14px 16px}
+  .vol-muscle{font-size:14px}
+  .vol-stats{font-size:11px;gap:10px;flex-wrap:wrap}
+  .vol-scale{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
@@ -145,6 +182,7 @@ tbody tr:hover{background:var(--surface-2)}
 
 <script>
 const COLS = ["Ejercicio","Sets × Reps","Descanso","RPE","Carga","Nota Técnica"];
+
 
 const DATA = {
   transicion:{
@@ -368,6 +406,19 @@ const DATA = {
       ]},
     ]
   },
+  volumen:{
+    name:"📊 Volumen", weeks:"Por músculo", dates:"MV · MEV · MAV · MRV",
+    isVolume:true,
+    meta:[["Metodología","Renaissance Periodization"],["Indirectas","Contadas ×0.5"],["Fase por defecto","Acumulación"],["Zonas","MV · MEV · MAV · MRV"]],
+    callouts:[
+      {t:"info",s:"📊 Series semanales directas + indirectas (×0.5). Las zonas MV/MEV/MAV/MRV vienen de RP (Israetel). MAV = sweet spot hipertrófico. MRV = techo pre-sobreentrenamiento. Cambiá de fase arriba para ver volumen de esa fase."},
+      {t:"tip",s:"💡 Cómo leer: el marcador blanco en la barra muestra tu volumen actual. Si cae en 🟢 MEV o 🟡 MAV estás en rango productivo. 🔵 azul = undertraining, 🟠 naranja = overreach, 🔴 rojo = sobreentrenamiento."},
+    ],
+    volumePhases:[
+      ["transicion","Transición"],["acumulacion","Acumulación"],
+      ["intensificacion","Intensificación"],["peaking","Peaking/Taper"],
+    ],
+  },
 };
 
 const WARMUP_DATA = [
@@ -380,6 +431,165 @@ const WARMUP_DATA = [
   ["157.5","1","8-10 min","-8 min","≥0.26 m/s","Solo si te sentís perfecto. OPCIONAL"],
   ["OPENER (165 kg)","1","—","TARIMA","—","Primer intento"],
 ];
+
+// ═══ VOLUME MODULE — Weekly sets per muscle group ═══
+// Methodology: Renaissance Periodization (Mike Israetel). Indirect sets counted 0.5x.
+// MV: maintain · MEV: min effective growth · MAV: max adaptive (sweet spot) · MRV: max recoverable
+const VOLUME_ZONES = {
+  // [MV, MEV, MAV, MRV] — weekly working sets
+  pecho:       {label:"Pecho",             zones:[4,8,12,20,26]},
+  espalda:     {label:"Espalda",           zones:[6,10,14,22,28]},
+  triceps:     {label:"Tríceps",           zones:[2,6,10,14,18]},
+  biceps:      {label:"Bíceps",            zones:[4,8,12,20,24]},
+  delt_ant:    {label:"Deltoides anterior",zones:[0,4,8,12,18]},
+  delt_lat:    {label:"Deltoides lateral", zones:[6,8,12,20,26]},
+  delt_post:   {label:"Deltoides posterior",zones:[0,6,10,16,22]},
+  trapecio:    {label:"Trapecios",         zones:[2,6,10,16,20]},
+  antebrazo:   {label:"Antebrazos / grip", zones:[1,2,4,6,10]},
+  core:        {label:"Core / abdomen",    zones:[0,6,10,16,22]},
+  piernas:     {label:"Piernas",           zones:[4,8,12,18,24]},
+};
+
+// Weekly sets per phase (direct + indirect×0.5 = total)
+// Estimated para atleta bench-focus, 4× bench/sem en Acumulación, 3× en Intensif.
+const VOLUME_DATA = {
+  transicion:{
+    phaseName:"Transición (Sem 1-2)",
+    data:{
+      pecho:     {d:3, i:0,  ex:"Bench Press Ligero (reactivación)"},
+      espalda:   {d:5, i:2,  ex:"Remo Ligero, Band Pull-Aparts"},
+      triceps:   {d:0, i:6,  ex:"Indirecto del bench ligero"},
+      biceps:    {d:0, i:0,  ex:"—"},
+      delt_ant:  {d:0, i:3,  ex:"Indirecto bench + press inclinado DB"},
+      delt_lat:  {d:0, i:0,  ex:"—"},
+      delt_post: {d:5, i:0,  ex:"Face Pulls, Band Pull-Aparts"},
+      trapecio:  {d:0, i:3,  ex:"Indirecto del remo"},
+      antebrazo: {d:0, i:2,  ex:"Indirecto del grip en remo/bench"},
+      core:      {d:0, i:4,  ex:"Estabilidad en bench con arco"},
+      piernas:   {d:0, i:1,  ex:"Drill Leg Drive (muy leve)"},
+    },
+  },
+  acumulacion:{
+    phaseName:"Acumulación (Sem 3-5)",
+    data:{
+      pecho:     {d:18, i:2, ex:"Bench Comp (2×), CAT Speed, DB Bench, Press Inclinado 30°, Spoto/Dead Bench"},
+      espalda:   {d:14, i:0, ex:"Remo Pecho, Lat Pulldown, Chin-Ups, Face Pulls indir"},
+      triceps:   {d:6,  i:18,ex:"Close-Grip, Ext Overhead, Dips + indirecto bench"},
+      biceps:    {d:4,  i:3, ex:"Curl DB/barra + indirecto chin-ups"},
+      delt_ant:  {d:0,  i:20,ex:"Indirecto masivo: bench 4×/sem + press inclinado"},
+      delt_lat:  {d:2,  i:0, ex:"Elevaciones Laterales (volumen bajo — bench focus)"},
+      delt_post: {d:6,  i:2, ex:"Face Pulls (2×/sem) + indirecto remos"},
+      trapecio:  {d:0,  i:7, ex:"Indirecto remos + chin-ups"},
+      antebrazo: {d:0,  i:4, ex:"Indirecto grip en todo el trabajo de tracción"},
+      core:      {d:0,  i:8, ex:"Estabilidad en bench arqueado + CAT bracing"},
+      piernas:   {d:0,  i:2, ex:"Drill leg drive (patrón, no hipertrofia)"},
+    },
+  },
+  intensificacion:{
+    phaseName:"Intensificación (Sem 7-9)",
+    data:{
+      pecho:     {d:16, i:2, ex:"Bench Comp Top+Back-off, CAT Speed, Spoto, DB Bench, Press Inclinado"},
+      espalda:   {d:12, i:0, ex:"Remo Pecho, Lat Pulldown (volumen reducido para recuperación)"},
+      triceps:   {d:5,  i:16,ex:"Close-Grip (peso alto), Ext Overhead + indirecto"},
+      biceps:    {d:4,  i:2, ex:"Curl + indirecto (eliminado en Sem 10)"},
+      delt_ant:  {d:0,  i:18,ex:"Indirecto bench 3×/sem + press inclinado"},
+      delt_lat:  {d:2,  i:0, ex:"Elevaciones Laterales"},
+      delt_post: {d:6,  i:2, ex:"Face Pulls — crítico para salud hombro con cargas altas"},
+      trapecio:  {d:0,  i:6, ex:"Indirecto"},
+      antebrazo: {d:0,  i:4, ex:"Indirecto"},
+      core:      {d:0,  i:9, ex:"Estabilidad con cargas 90-95% + supramaximal holds Sem 10"},
+      piernas:   {d:0,  i:2, ex:"Drill leg drive"},
+    },
+  },
+  peaking:{
+    phaseName:"Peaking + Taper (Sem 11-12)",
+    data:{
+      pecho:     {d:8,  i:1, ex:"Opener rehearsal, técnico ligero, último bench"},
+      espalda:   {d:4,  i:0, ex:"Solo mantenimiento (Remo Ligero)"},
+      triceps:   {d:0,  i:8, ex:"Solo indirecto del bench"},
+      biceps:    {d:0,  i:0, ex:"—"},
+      delt_ant:  {d:0,  i:9, ex:"Indirecto del bench reducido"},
+      delt_lat:  {d:0,  i:0, ex:"—"},
+      delt_post: {d:4,  i:0, ex:"Face Pulls, Band Pull-Aparts"},
+      trapecio:  {d:0,  i:2, ex:"Indirecto"},
+      antebrazo: {d:0,  i:2, ex:"Indirecto"},
+      core:      {d:0,  i:5, ex:"Estabilidad en aperturas"},
+      piernas:   {d:0,  i:1, ex:"Drill leg drive mínimo"},
+    },
+  },
+};
+
+function zoneOf(total, zones){
+  const [mv,mev,mav,mrv,ceiling]=zones;
+  if(total<mv)return {key:"undertrain",label:"< MV",color:"#3b82f6",desc:"Detraining"};
+  if(total<mev)return {key:"mv",label:"MV",color:"#94a3b8",desc:"Mantenimiento"};
+  if(total<mav)return {key:"mev",label:"MEV",color:"#4ade80",desc:"Hipertrofia mínima"};
+  if(total<mrv)return {key:"mav",label:"MAV",color:"#facc15",desc:"Sweet spot"};
+  if(total<ceiling)return {key:"mrv",label:"MRV",color:"#fb923c",desc:"Overreach"};
+  return {key:"over",label:"> MRV",color:"#f87171",desc:"Sobreentrenamiento"};
+}
+
+function buildVolumeSection(phaseKey){
+  const el = document.createElement("div");
+  const vol = VOLUME_DATA[phaseKey];
+  if(!vol){ el.textContent="Sin datos de volumen para esta fase."; return el; }
+
+  // Legend
+  const legend = document.createElement("div");
+  legend.className="vol-legend";
+  legend.innerHTML = `
+    <div><strong style="color:var(--text)">📊 Volumen semanal por músculo — ${vol.phaseName}</strong></div>
+    <div style="margin-top:6px">Series directas + indirectas (×0.5). Zonas según Renaissance Periodization.</div>
+    <div class="zones">
+      <span><i style="background:#3b82f6"></i>&lt; MV</span>
+      <span><i style="background:#94a3b8"></i>MV</span>
+      <span><i style="background:#4ade80"></i>MEV</span>
+      <span><i style="background:#facc15"></i>MAV</span>
+      <span><i style="background:#fb923c"></i>MRV</span>
+      <span><i style="background:#f87171"></i>&gt; MRV</span>
+    </div>`;
+  el.appendChild(legend);
+
+  const grid = document.createElement("div");
+  grid.className="vol-grid";
+
+  Object.entries(VOLUME_ZONES).forEach(([key, muscle])=>{
+    const d = vol.data[key] || {d:0,i:0,ex:"—"};
+    const total = d.d + d.i*0.5;
+    const [mv,mev,mav,mrv,ceiling] = muscle.zones;
+    const zone = zoneOf(total, muscle.zones);
+    // Marker position as % of ceiling
+    const pct = Math.min(100, (total/ceiling)*100);
+    const mvPct  = (mv/ceiling)*100;
+    const mevPct = (mev/ceiling)*100;
+    const mavPct = (mav/ceiling)*100;
+    const mrvPct = (mrv/ceiling)*100;
+
+    const card = document.createElement("div");
+    card.className="vol-card";
+    card.innerHTML = `
+      <div class="vol-head">
+        <div class="vol-muscle">${muscle.label}</div>
+        <div class="vol-badge ${zone.key}">${zone.label} · ${zone.desc}</div>
+      </div>
+      <div class="vol-stats">
+        <span>Directas <b>${d.d}</b></span>
+        <span>Indirectas <b>${d.i}</b> (×0.5 = ${(d.i*0.5).toFixed(1)})</span>
+        <span>Total <b>${total}</b> sets/sem</span>
+      </div>
+      <div class="vol-bar" style="--mv:${mvPct}%;--mev:${mevPct}%;--mav:${mavPct}%;--mrv:${mrvPct}%">
+        <div class="vol-marker" style="left:${pct}%"></div>
+      </div>
+      <div class="vol-scale">
+        <span>0</span><span>MV ${mv}</span><span>MEV ${mev}</span><span>MAV ${mav}</span><span>MRV ${mrv}</span>
+      </div>
+      <div class="vol-ex"><strong>Ejercicios:</strong> ${d.ex}</div>`;
+    grid.appendChild(card);
+  });
+
+  el.appendChild(grid);
+  return el;
+}
 
 const ATTEMPTS_DATA = [
   {esc:"🟢 A: Día ÓPTIMO",crit:"vel ≥0.30 m/s a 165",i1:"165 kg",i2:"172.5 kg",i3:"180 kg",note:"Abre de día bueno. 2do valida, 3ro PR."},
@@ -448,9 +658,64 @@ function renderMeta(phase){
   });
 }
 
+let currentVolumePhase = "acumulacion";
+
+function renderVolumeSection(container){
+  const phase = DATA.volumen;
+  // callouts
+  phase.callouts?.forEach(c=>{
+    const el = document.createElement("div");
+    el.className=`callout ${c.t}`;
+    el.textContent=c.s;
+    container.appendChild(el);
+  });
+  // sub-phase selector
+  const nav = document.createElement("nav");
+  nav.className="phases";
+  nav.style.cssText="border-bottom:none;padding-bottom:0;margin-bottom:20px";
+  phase.volumePhases.forEach(([k,lbl])=>{
+    const b = document.createElement("button");
+    b.className="chip"+(k===currentVolumePhase?" active":"");
+    b.textContent = lbl;
+    b.onclick = ()=>{
+      currentVolumePhase = k;
+      container.innerHTML="";
+      renderVolumeSection(container);
+      gsap.from(".vol-card",{y:14,opacity:0,duration:.4,stagger:.03,ease:"power2.out"});
+      // animate markers after mount
+      requestAnimationFrame(()=>{
+        document.querySelectorAll(".vol-marker").forEach((m,i)=>{
+          const target = m.style.left;
+          m.style.left = "0%";
+          gsap.to(m,{left:target,duration:.9,delay:.05+i*.02,ease:"power3.out"});
+        });
+      });
+    };
+    nav.appendChild(b);
+  });
+  container.appendChild(nav);
+  // volume cards
+  container.appendChild(buildVolumeSection(currentVolumePhase));
+  // animate markers on first render
+  requestAnimationFrame(()=>{
+    document.querySelectorAll(".vol-marker").forEach((m,i)=>{
+      const target = m.style.left;
+      m.style.left = "0%";
+      gsap.to(m,{left:target,duration:1,delay:.1+i*.03,ease:"power3.out"});
+    });
+  });
+}
+
 function renderDays(phase){
   const container = document.getElementById("days");
   container.innerHTML="";
+
+  if(phase.isVolume){
+    renderVolumeSection(container);
+    gsap.from(".vol-card",{y:16,opacity:0,duration:.45,stagger:.04,ease:"power2.out"});
+    gsap.from(".meta",{y:16,opacity:0,duration:.4,stagger:.04,ease:"power2.out"});
+    return;
+  }
 
   phase.callouts?.forEach(c=>{
     const el = document.createElement("div");
